@@ -42,11 +42,11 @@ export type Store<S = any> = {
   setState: (state: S) => void;
   getInitialState: () => S;
 };
-export function createStore<S, TKey extends keyof S>(
+export function createStore<S>(
   rootSlice: RootSlice<S>
 ): Store<S> {
   let isDispatching = false;
-  const slices = Object.entries(rootSlice) as [TKey, RootSlice<S>[TKey]][];
+  const slices = Object.entries(rootSlice) as [keyof S, RootSlice<S>[keyof S]][];
   const initialState = slices.reduce((prev, [key, value]) => {
     return { ...prev, [key]: value.initialState };
   }, {} as S);
@@ -111,7 +111,7 @@ const createAction = <P = any>(type: string) => {
     return { type, payload };
   };
 };
-export function createSlice<S, CaseReducers extends SliceCaseReducer<S>>(
+export function createSlice<S>(
   options: SliceOptions<S>
 ): Slice<S> {
   const { initialState, reducers, name } = options;
@@ -136,6 +136,6 @@ export function createSlice<S, CaseReducers extends SliceCaseReducer<S>>(
       return newState;
     },
     initialState,
-    actions: actionCreators as CaseActionCreator<CaseReducers>,
+    actions: actionCreators as CaseActionCreator<SliceCaseReducer<S>>,
   };
 }
