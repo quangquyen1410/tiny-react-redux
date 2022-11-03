@@ -1,0 +1,22 @@
+{
+  "name": "tiny-react-redux",
+  "version": "1.0.0",
+  "description": "A tiny state management like redux and use them like redux toolkit",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "redux-toolkit",
+    "react-redux",
+    "tiny-redux",
+    "tiny-react-redux",
+    "toolkit",
+    "reducer",
+    "slice"
+  ],
+  "author": "quangquyen1410@gmail.com",
+  "license": "MIT"
+}
