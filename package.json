@@ -2,10 +2,22 @@
   "name": "tiny-react-redux",
   "version": "1.0.0",
   "description": "A tiny state management like redux and use them like redux toolkit",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quangquyen1410/tiny-react-redux.git"
+  },
+  "bugs": {
+    "url": "https://github.com/quangquyen1410/tiny-react-redux/issues"
+  },
+  "homepage": "https://github.com/quangquyen1410/tiny-react-redux#readme",
   "keywords": [
     "react",
     "redux",
@@ -16,6 +28,9 @@
     "toolkit",
     "reducer",
     "slice"
+  ],
+  "files": [
+    "dist/**/*"
   ],
   "author": "quangquyen1410@gmail.com",
   "license": "MIT",
