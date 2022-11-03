@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { StateContext } from "src/stores/base";
-import { Store } from "./handle";
+import { StateContext, Store } from "./handle";
 
 type ProviderProps = {
   children: React.ReactNode;
