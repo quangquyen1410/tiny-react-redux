@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES5",
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
@@ -9,7 +9,7 @@
     "lib": ["esnext"],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "module": "esnext",
+    "module": "CommonJS",
     "baseUrl": "./"
   },
   "include": ["src"],
