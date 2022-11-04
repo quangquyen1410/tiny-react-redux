@@ -9,7 +9,6 @@
     "lib": ["esnext"],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "emitDeclarationOnly": true,
     "module": "esnext",
     "baseUrl": "./"
   },
