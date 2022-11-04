@@ -5,10 +5,10 @@
     "outDir": "./dist",
     "strict": true,
     "jsx": "react",
+    "esModuleInterop": true,
     "isolatedModules": true,
     "lib": ["esnext"],
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
     "module": "CommonJS",
     "baseUrl": "./"
   },
