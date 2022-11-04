@@ -1,6 +1,6 @@
 {
   "name": "tiny-react-redux",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "A tiny state management like redux and use them like redux toolkit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
