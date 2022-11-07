@@ -6,33 +6,39 @@ import {
 } from "react";
 
 export type PayloadAction<P = any, T = string> = {
-  payload?: P;
+  payload: P;
   type: T;
 };
 type Reducer<S = any, A = PayloadAction> = (state: S, action: A) => S;
-type Slice<S = any> = {
+type Slice<S, CR> = {
   name: string;
   initialState: S;
   reducer: Reducer<S>;
-  actions: CaseActionCreator<SliceCaseReducer<S>>;
+  actions: CaseActionCreator<SliceCaseReducers<CR>>;
 };
-type RootSlice<S> = {
-  [K in keyof S]: Slice<S[K]>;
+type RootSlice<S, CR> = {
+  [K in keyof S]: Slice<S[K], CR>;
 };
-type ActionCreator = <P = any>(payload?: P) => PayloadAction<P>;
+type ActionCreator<P = any> = (payload: P) => PayloadAction<P>;
+type ActionCreatorWithoutPayload = () => PayloadAction;
+type ActionCreatorReducer<CR> = CR extends (
+  state: any,
+  action: infer Action
+) => void
+  ? Action extends { payload: infer P }
+    ? ActionCreator<P>
+    : ActionCreatorWithoutPayload
+  : ActionCreatorWithoutPayload;
 type CaseActionCreator<CR> = {
-  [K in keyof CR]: ActionCreator;
+  [K in keyof CR]: ActionCreatorReducer<CR[K]>;
 };
-type SliceCaseReducer<S> = {
-  [K: string]: Reducer<S>;
+type SliceCaseReducers<CR> = {
+  [K in keyof CR]: CR[K];
 };
-type SliceOptions<
-  S = any,
-  CaseReducers extends SliceCaseReducer<S> = SliceCaseReducer<S>
-> = {
+type SliceOptions<S, CR> = {
   name: string;
   initialState: S;
-  reducers: CaseReducers;
+  reducers: SliceCaseReducers<CR>;
 };
 export type TypedUseAppSelector<S> = () => S;
 export type Store<S = any> = {
@@ -42,11 +48,12 @@ export type Store<S = any> = {
   setState: (state: S) => void;
   getInitialState: () => S;
 };
-export function createStore<S>(
-  rootSlice: RootSlice<S>
-): Store<S> {
+export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
   let isDispatching = false;
-  const slices = Object.entries(rootSlice) as [keyof S, RootSlice<S>[keyof S]][];
+  const slices = Object.entries(rootSlice) as [
+    keyof S,
+    RootSlice<S, CR>[keyof S]
+  ][];
   const initialState = slices.reduce((prev, [key, value]) => {
     return { ...prev, [key]: value.initialState };
   }, {} as S);
@@ -59,10 +66,9 @@ export function createStore<S>(
   const getInitialState = () => initialState;
   const reducers = (state: S, action: PayloadAction) => {
     const sliceKey = getSliceKey(action.type);
-    const slice = rootSlice[sliceKey as keyof RootSlice<S>];
+    const slice = rootSlice[sliceKey as keyof RootSlice<S, CR>];
     let currentState = slice.reducer(state[sliceKey as keyof S], action);
-    state = { ...state, [sliceKey]: { ...currentState } };
-    return state;
+    return { ...state, [sliceKey]: { ...currentState } };
   };
   const listeners = new Set<Function>();
   const subscribe = (listener: () => void) => {
@@ -107,23 +113,23 @@ const getSliceKey = (type: string) => {
   return type.split("/")[0];
 };
 const createAction = <P = any>(type: string) => {
-  return (payload?: P) => {
+  return (payload: P) => {
     return { type, payload };
   };
 };
-export function createSlice<S>(
-  options: SliceOptions<S>
-): Slice<S> {
+export function createSlice<S, CR extends Record<string, Reducer<S>>>(
+  options: SliceOptions<S, CR>
+): Slice<S, CR> {
   const { initialState, reducers, name } = options;
   if (!name) {
     throw new Error("`name` is a required option for createSlice");
   }
-  const caseReducers: Record<string, Reducer<S>> = {};
-  const actionCreators: Record<string, ActionCreator> = {};
+  const caseReducers: CR = {} as CR;
+  const actionCreators: CaseActionCreator<CR> = {} as CaseActionCreator<CR>;
   for (const reducerName in reducers) {
     const type = getReducerType(name, reducerName);
-    caseReducers[type] = reducers[reducerName];
-    actionCreators[reducerName] = createAction(type);
+    caseReducers[type as keyof CR] = reducers[reducerName];
+    actionCreators[reducerName] = createAction(type) as any;
   }
   return {
     name,
@@ -132,10 +138,9 @@ export function createSlice<S>(
       if (!reducer) {
         throw new Error(`Action ${action.type} not found`);
       }
-      const newState = reducer(state, action);
-      return newState;
+      return reducer(state, action);
     },
     initialState,
-    actions: actionCreators as CaseActionCreator<SliceCaseReducer<S>>,
+    actions: actionCreators,
   };
 }
