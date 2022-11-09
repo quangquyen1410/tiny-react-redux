@@ -3,7 +3,7 @@ import { StateContext, Store } from "../handle";
 
 type ProviderProps = {
   children: React.ReactNode;
-  initialStateProvider: any;
+  initialStateProvider?: any;
   store: Store;
 };
 const StoreProvider = ({
@@ -12,7 +12,9 @@ const StoreProvider = ({
   store,
 }: ProviderProps) => {
   const contextValue = useMemo(() => {
-    store.setState(initialStateProvider);
+    if (initialStateProvider) {
+      store.setState(initialStateProvider);
+    }
     return { store };
   }, [initialStateProvider, store]);
   return (
