@@ -6,7 +6,7 @@ type ProviderProps = {
   initialStateProvider?: any;
   store: Store;
 };
-const StoreProvider = ({
+const Provider = ({
   children,
   initialStateProvider,
   store,
@@ -23,4 +23,4 @@ const StoreProvider = ({
     </StateContext.Provider>
   );
 };
-export default StoreProvider;
+export default Provider;

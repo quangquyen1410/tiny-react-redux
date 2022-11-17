@@ -1,2 +1,3 @@
 export * from "./handle";
-export * from "./Provider";
+import Provider from "./Provider";
+export { Provider };
