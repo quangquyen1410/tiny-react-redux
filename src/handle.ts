@@ -68,7 +68,8 @@ export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
     const sliceKey = getSliceKey(action.type);
     const slice = rootSlice[sliceKey as keyof RootSlice<S, CR>];
     let currentState = slice.reducer(state[sliceKey as keyof S], action);
-    return { ...state, [sliceKey]: { ...currentState } };
+    state[sliceKey as keyof S] = currentState;
+    return state;
   };
   const listeners = new Set<Function>();
   const subscribe = (listener: () => void) => {
