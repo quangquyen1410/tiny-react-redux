@@ -16,7 +16,7 @@ const Provider = ({
       store.setState(initialStateProvider);
     }
     return { store };
-  }, [initialStateProvider, store]);
+  }, []);
   return (
     <StateContext.Provider value={contextValue}>
       {children}
