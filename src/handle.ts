@@ -40,13 +40,14 @@ type SliceOptions<S, CR> = {
   initialState: S;
   reducers: SliceCaseReducers<CR>;
 };
-export type TypedUseAppSelector<S> = () => S;
+export type TypedUseAppSelector<S> = <R>(selector: (state: S) => R) => R;
 export type Store<S = any> = {
   getState: () => S;
   dispatch: Dispatch<PayloadAction>;
   subscribe: (listener: () => void) => () => void;
   setState: (state: S) => void;
   getInitialState: () => S;
+  getStateBySelector: <R>(selector: (state: S) => R) => R;
 };
 export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
   let isDispatching = false;
@@ -59,6 +60,9 @@ export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
   }, {} as S);
   let currentState = initialState;
   const getState = () => currentState;
+  const getStateBySelector = <R>(selector: (state: S) => R) => {
+    return selector(currentState);
+  };
   const setState = (state: S) => {
     // set current state to the new state
     currentState = state;
@@ -93,15 +97,17 @@ export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
     subscribe,
     setState,
     getInitialState,
+    getStateBySelector,
   };
 }
 interface StateContext<S = any> {
   store: Store<S>;
 }
 export const StateContext = createContext<StateContext>(null as any);
-export const useSelector = () => {
+export const useSelector: TypedUseAppSelector<any> = (selector) => {
   const { store } = useContext(StateContext);
-  return useSyncExternalStore(store.subscribe, store.getState, store.getState);
+  const getState = () => store.getStateBySelector(selector);
+  return useSyncExternalStore(store.subscribe, getState, getState);
 };
 export const useDispatch = () => {
   const { store } = useContext(StateContext);
