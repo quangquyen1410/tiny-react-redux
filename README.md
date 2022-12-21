@@ -113,8 +113,9 @@ Server side rendering with `Nextjs`, in the file `_app.tsx`:
 ```tsx
 import type { AppProps } from "next/app";
 function MyApp({ Component, pageProps }: AppProps) {
-  const initialState = store.getInitialState();
-  const initState: typeof initialState = {
+  const initState = useMemo(() => {
+    const initialState = store.getInitialState();
+    return {
     ...initialState,
     ...{
       cart: {
@@ -122,7 +123,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       },
     },
   };
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <StoreProvider initialStateProvider={initState} store={store}>
       <Component {...pageProps} />
@@ -140,7 +142,7 @@ import { useAppSelector } from "src/store";
 import { useDispatch } from "tiny-react-redux";
 import { addToCartToApi, addToCart } from "src/store/cart";
 const Component = () => {
-  const { miniCart } = useAppSelector().cart;
+  const miniCart = useAppSelector(state => state.cart.miniCart);
   const dispatch = useDispatch();
   const onDispatchMiniCart = () => {
     dispatch(addToCart(/*cartItem*/));
