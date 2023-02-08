@@ -8,13 +8,16 @@
 
 ## Installation
 
-
 Tiny React Redux is available as a package on NPM for use with a module bundler or in a Node application:
+
 # NPM
+
 ```bash
 npm install tiny-react-redux
 ```
+
 # Yarn
+
 ```bash
 yarn add tiny-react-redux
 ```
@@ -57,8 +60,15 @@ const cartSlice = createSlice({
   initialState: cartState,
   reducers: {
     addToCart(state, action: PayloadAction<CartItem>) {
-      state.miniCart = [...state.miniCart, action.payload]
-      return state;
+      state.miniCart = [...state.miniCart, action.payload];
+    },
+    // A common mistake is to try assigning state = someValue directly. This will not work!
+    errorReplaceCart(state, { payload }: PayloadAction<CartState>) {
+      state = payload;
+    },
+    //Instead, to replace the existing state, you should return the new value directly:
+    correctReplaceState(state, { payload }: PayloadAction<CartState>) {
+      return payload;
     },
   },
 });
@@ -116,14 +126,14 @@ function MyApp({ Component, pageProps }: AppProps) {
   const initState = useMemo(() => {
     const initialState = store.getInitialState();
     return {
-    ...initialState,
-    ...{
-      cart: {
-        miniCart: pageProps.miniCart || initialState.cart.miniCart,
+      ...initialState,
+      ...{
+        cart: {
+          miniCart: pageProps.miniCart || initialState.cart.miniCart,
+        },
       },
-    },
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <StoreProvider initialStateProvider={initState} store={store}>
@@ -142,7 +152,7 @@ import { useAppSelector } from "src/store";
 import { useDispatch } from "tiny-react-redux";
 import { addToCartToApi, addToCart } from "src/store/cart";
 const Component = () => {
-  const miniCart = useAppSelector(state => state.cart.miniCart);
+  const miniCart = useAppSelector((state) => state.cart.miniCart);
   const dispatch = useDispatch();
   const onDispatchMiniCart = () => {
     dispatch(addToCart(/*cartItem*/));
