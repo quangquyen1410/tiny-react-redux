@@ -4,12 +4,11 @@ import {
   useContext,
   useSyncExternalStore,
 } from "react";
-
 export type PayloadAction<P = any, T = string> = {
   payload: P;
   type: T;
 };
-type Reducer<S = any, A = PayloadAction> = (state: S, action: A) => S;
+type Reducer<S = any, A = PayloadAction> = (state: S, action: A) => void | S;
 type Slice<S, CR> = {
   name: string;
   initialState: S;
@@ -65,15 +64,18 @@ export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
   };
   const setState = (state: S) => {
     // set current state to the new state
-    currentState = state;
+    currentState = deepCopy(state);
   };
   const getInitialState = () => initialState;
   const reducers = (state: S, action: PayloadAction) => {
     const sliceKey = getSliceKey(action.type);
     const slice = rootSlice[sliceKey as keyof RootSlice<S, CR>];
-    let currentState = slice.reducer(state[sliceKey as keyof S], action);
-    state[sliceKey as keyof S] = currentState;
-    return { ...state };
+    const stateByKey = state[sliceKey as keyof S];
+    const newState = slice.reducer(stateByKey, action);
+    return {
+      ...state,
+      [sliceKey]: deepCopy(newState || stateByKey),
+    };
   };
   const listeners = new Set<Function>();
   const subscribe = (listener: () => void) => {
@@ -151,3 +153,32 @@ export function createSlice<S, CR extends Record<string, Reducer<S>>>(
     actions: actionCreators,
   };
 }
+/**
+ * Deep copy object
+ *
+ * Example:
+ *
+ * ```javascript
+ * const originalObject = { a: 1, b: { c: 2 } };
+ * const deepCopy = deepCopy(originalObject);
+ * console.log(deepCopy); // Output: { a: 1, b: { c: 2 } }
+ * ```
+ * @param  {T} obj
+ * @returns T
+ */
+const deepCopy = <T>(obj: T): T => {
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(deepCopy) as any;
+  }
+
+  const copy = {} as T;
+  for (const key in obj) {
+    copy[key] = deepCopy(obj[key]);
+  }
+
+  return copy;
+};
