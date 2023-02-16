@@ -72,10 +72,10 @@ export function createStore<S, CR>(rootSlice: RootSlice<S, CR>): Store<S> {
     const slice = rootSlice[sliceKey as keyof RootSlice<S, CR>];
     const stateByKey = state[sliceKey as keyof S];
     const newState = slice.reducer(stateByKey, action);
-    return {
+    return deepCopy({
       ...state,
-      [sliceKey]: deepCopy(newState || stateByKey),
-    };
+      [sliceKey]: newState || stateByKey,
+    });
   };
   const listeners = new Set<Function>();
   const subscribe = (listener: () => void) => {
